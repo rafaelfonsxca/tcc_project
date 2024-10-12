@@ -15,8 +15,9 @@ class LogoDetector:
     def _convert_seconds_to_timestamp(self, seconds):
         hours = int(seconds // 3600)
         minutes = int((seconds % 3600) // 60)
-        seconds = int(seconds % 60)
-        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        secs = int(seconds % 60)
+        milliseconds = int((seconds % 1) * 1000)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}.{milliseconds:03d}"
 
     def tm_ccoeff_normed_based(self):
         cap = cv2.VideoCapture(self.video_path)
@@ -157,7 +158,10 @@ class LogoDetector:
             })
 
         cap.release()
-        return detections
+
+        detection = [{'start': detections[0]['start'], 'end': detections[-1]['end']}]
+
+        return detection
     
     def cut(self, input_video, start_time, end_time, output_video):
         """
@@ -189,17 +193,19 @@ class LogoDetector:
     def main(self):
         start = time.time()
         if not self.resize:
-            print('Start detection with TM_CCOEFF_NORMED from Template_Matching.')
+            print('Start detection with TM_CCOEFF_NORMED from Template_Matching...')
             detections = self.tm_ccoeff_normed_based()
-            self.cut(self.video_path, detections[0]['start'], detections[0]['end'], self.path_to_save_video)
+            print('Detections: ', detections)
         else:
-            pass
+            print('Start detection with SIFT...')
+            detections = self.sift_based()
+            print('Detections: ', detections)
+        self.cut(self.video_path, detections[0]['start'], detections[0]['end'], self.path_to_save_video)
         print(f'System execution time: {time.time() - start} seconds')
 
-    
-
 if __name__ == '__main__':
-    detector = LogoDetector(video_path='../videos/15s-canto-direito.mp4',
+    detector = LogoDetector(video_path='../videos/15s-canto-esquerdo-pequeno.mp4',
                             logo_path='../target/logo_target.png',
-                            path_to_save_video='videos_cortados/video_cortado_test_2.mp4')
+                            path_to_save_video='videos_cortados/video_cortado_test_sift2.mp4',
+                            resize=True)
     detector.main()

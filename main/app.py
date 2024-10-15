@@ -23,10 +23,6 @@ class LogoDetector:
         cap = cv2.VideoCapture(self.video_path)
         logo = cv2.imread(self.logo_path, 0)  # reading logo target in gray scale
 
-        if not cap.isOpened():
-            print("Erro ao abrir o vídeo.")
-            return
-
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         detection_started = False
@@ -76,17 +72,9 @@ class LogoDetector:
 
     def sift_based(self):
         logo_image = cv2.imread(self.logo_path, cv2.IMREAD_GRAYSCALE)
-        if logo_image is None:
-            raise IOError("Não foi possível carregar a imagem da logotipo.")
-
         cap = cv2.VideoCapture(self.video_path)
-        if not cap.isOpened():
-            raise IOError("Não foi possível abrir o vídeo.")
-
         sift = cv2.SIFT_create()
         _, des_logo = sift.detectAndCompute(logo_image, None)
-        if des_logo is None:
-            raise ValueError("Não foi possível encontrar descritores na logotipo.")
 
         FLANN_INDEX_KDTREE = 1
         index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
@@ -99,9 +87,6 @@ class LogoDetector:
         detections = []
 
         fps = cap.get(cv2.CAP_PROP_FPS)
-        if fps == 0:
-            raise ValueError("FPS do vídeo é 0, verifique o arquivo de vídeo.")
-
         frame_count = 0
 
         while True:
@@ -164,26 +149,13 @@ class LogoDetector:
         return detection
     
     def cut(self, input_video, start_time, end_time, output_video):
-        """
-        Corta um vídeo de acordo com os timestamps inicial e final.
-
-        Args:
-        - input_video (str): Caminho do vídeo de entrada.
-        - start_time (str): Timestamp inicial no formato 'hh:mm:ss'.
-        - end_time (str): Timestamp final no formato 'hh:mm:ss'.
-        - output_video (str): Caminho do vídeo de saída.
-
-        Returns:
-        - None
-        """
-        # Comando ffmpeg para cortar o vídeo
         command = [
             'ffmpeg', 
-            '-i', input_video,   # Arquivo de entrada
-            '-ss', start_time,   # Tempo inicial
-            '-to', end_time,     # Tempo final
-            '-c', 'copy',        # Copia sem recodificar
-            output_video         # Arquivo de saída
+            '-i', input_video,   # input
+            '-ss', start_time,   # start
+            '-to', end_time,     # end
+            '-c', 'copy',        
+            output_video         # path to save
         ]
         
         # Executa o comando

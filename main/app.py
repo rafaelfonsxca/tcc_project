@@ -76,8 +76,7 @@ class LogoDetector:
         sift = cv2.SIFT_create()
         _, des_logo = sift.detectAndCompute(logo_image, None)
 
-        FLANN_INDEX_KDTREE = 1
-        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+        index_params = dict(algorithm=1, trees=5)
         search_params = dict(checks=50)
         flann = cv2.FlannBasedMatcher(index_params, search_params)
 
@@ -105,10 +104,10 @@ class LogoDetector:
                     matches = []
 
                 good_matches = []
-                for m_n in matches:
-                    if len(m_n) != 2:
+                for m in matches:
+                    if len(m) != 2:
                         continue
-                    m, n = m_n
+                    m, n = m
                     if m.distance < self.ratio_test * n.distance:
                         good_matches.append(m)
 
